@@ -10,7 +10,7 @@ If you are adding a new script, please create a new folder for your script, then
 
 ### Using uv
 
-Working with uv allows us to easily work with scripts. If you have uv installed you can run the following:
+Working with uv allows us to easily work with scripts. If you have uv installed you can run the following to install dependencies for a specific script:
 
 ```
 uv add --script <path/to/script> 'dep1' 'dep2'
