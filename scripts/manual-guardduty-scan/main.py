@@ -11,13 +11,12 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Iterator
 
 import boto3
 from mypy_boto3_guardduty.client import GuardDutyClient
 from mypy_boto3_s3.client import S3Client
-
 
 SCAN_STATUS_TAG: str = "GuardDutyMalwareScanStatus"
 
@@ -51,7 +50,9 @@ def get_malware_protection_plan_ids(
     guardduty_client: GuardDutyClient,
 ) -> list[str]:
     response: dict = guardduty_client.list_malware_protection_plans()
-    plans = [id["MalwareProtectionPlanId"] for id in response.get("MalwareProtectionPlans")]
+    plans = [
+        id["MalwareProtectionPlanId"] for id in response.get("MalwareProtectionPlans")
+    ]
 
     logger.info(f"Found {len(plans)} GuardDuty protection plan(s).")
 
@@ -65,7 +66,7 @@ def get_bucket_for_plan(
     response: dict = guardduty_client.get_malware_protection_plan(
         MalwareProtectionPlanId=plan_id,
     )
-    
+
     return response["ProtectedResource"]["S3Bucket"]["BucketName"]
 
 
@@ -82,7 +83,9 @@ def get_protected_buckets(
             )
         )
 
-    logger.info(f"The following {len(buckets)} bucket(s) have protection plans: {", ".join(buckets)}")
+    logger.info(
+        f"The following {len(buckets)} bucket(s) have protection plans: {', '.join(buckets)}"
+    )
 
     return buckets
 
@@ -108,10 +111,7 @@ def get_object_tags(
         Key=key,
     )
 
-    return {
-        tag["Key"]: tag["Value"]
-        for tag in response.get("TagSet", [])
-    }
+    return {tag["Key"]: tag["Value"] for tag in response.get("TagSet", [])}
 
 
 def needs_scan(
@@ -125,7 +125,7 @@ def needs_scan(
         key,
     )
 
-    return not any([key == SCAN_STATUS_TAG for key in list(tags.keys())])
+    return not any(key == SCAN_STATUS_TAG for key in list(tags.keys()))
 
 
 def submit_scan(
@@ -141,10 +141,7 @@ def submit_scan(
     )
 
 
-def categorise_objects(
-    s3_client: S3Client,
-    bucket_name: str
-) -> BucketObjects:
+def categorise_objects(s3_client: S3Client, bucket_name: str) -> BucketObjects:
     objects = BucketObjects()
 
     for key in list_object_keys(
@@ -171,14 +168,20 @@ def process_bucket(
     objects = categorise_objects(s3_client, bucket_name)
 
     logger.info(f"({bucket_name}) Found a total of {objects.total} object(s).")
-    logger.info(f"({bucket_name}) {len(objects.already_scanned)} object(s) have already been scanned.")
+    logger.info(
+        f"({bucket_name}) {len(objects.already_scanned)} object(s) have already been scanned."
+    )
 
     scan_count = 0
     if len(objects.needs_scan) == 0:
-        logger.info(f"({bucket_name}) No objects need scanning. Skipping GuardDuty scan step.")
+        logger.info(
+            f"({bucket_name}) No objects need scanning. Skipping GuardDuty scan step."
+        )
         return scan_count
     else:
-        logger.info(f"({bucket_name}) {len(objects.needs_scan)} object(s) need to be scanned. Sending to GuardDuty to be scanned.")
+        logger.info(
+            f"({bucket_name}) {len(objects.needs_scan)} object(s) need to be scanned. Sending to GuardDuty to be scanned."
+        )
 
     for object_key in objects.needs_scan:
         submit_scan(
@@ -209,7 +212,9 @@ def main() -> None:
             bucket_name,
         )
 
-    logger.info(f"Submitted malware scans for {total_scanned} object(s) across all buckets.")
+    logger.info(
+        f"Submitted malware scans for {total_scanned} object(s) across all buckets."
+    )
 
 
 if __name__ == "__main__":

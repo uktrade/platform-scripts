@@ -1,24 +1,16 @@
 default_language_version:
   python: python3.14
 repos:
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.8
     hooks:
       - id: ruff-check
         name: ruff check
-        entry: uv run ruff check --fix
-        language: system
+        args: [ --fix, "--extend-select=I,E,F,UP", "--ignore=E501" ]
         types: [python]
       - id: ruff-format
         name: ruff format
-        entry: uv run ruff format
-        language: system
         types: [python]
-      - id: trufflehog
-        name: TruffleHog
-        description: Detect secrets in your data.
-        entry: bash -c 'trufflehog filesystem . --no-update --no-verification --fail --exclude-paths=.trufflehogignore'
-        language: system
-        stages: ["pre-commit", "pre-push"]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -35,3 +27,11 @@ repos:
       - id: run-security-scan
         verbose: false
         args: [--verbose]
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your data.
+        entry: bash -c 'trufflehog filesystem . --no-update --no-verification --fail --exclude-paths=.trufflehogignore'
+        language: system
+        stages: ["pre-commit", "pre-push"]
