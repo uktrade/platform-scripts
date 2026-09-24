@@ -1,0 +1,37 @@
+default_language_version:
+  python: python3.14
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.8
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        args: [ --fix, "--extend-select=I,E,F,UP", "--ignore=E501" ]
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        types: [python]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: mixed-line-ending
+        name: Replace line endings
+      - id: detect-private-key
+        name: Detect private keys
+  - repo: https://github.com/uktrade/github-standards
+    rev: v1.3.0 # This should be the latest github released tag, see https://github.com/uktrade/github-standards/releases for the latest tag
+    hooks:
+      - id: validate-security-scan
+        verbose: false # This is helpful for debugging initial setup, it can be removed when the hooks are verified as working in your repository
+        args: [-v] # This is helpful for debugging the hook logic, the output is shown in the git output
+      - id: run-security-scan
+        verbose: false
+        args: [--verbose]
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your data.
+        entry: bash -c 'trufflehog filesystem . --no-update --no-verification --fail --exclude-paths=.trufflehogignore'
+        language: system
+        stages: ["pre-commit", "pre-push"]

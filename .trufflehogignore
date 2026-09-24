@@ -1,0 +1,12 @@
+.git
+.playwright-browsers
+node_modules
+poetry.lock
+venv
+.terraform
+slack_sdk
+venv
+.env
+.zip
+CHANGELOG.md
+.tox
