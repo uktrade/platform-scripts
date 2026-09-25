@@ -28,26 +28,6 @@ delete_message () {
     aws sqs delete-message --queue-url "$sqs_queue" --receipt-handle "$receipt_handle"
 }
 
-# while true; do
-#     echo "consuming message"
-#     response=$(consume_message "$SQS_QUEUE")
-#     echo $response
-
-#     if ! jq -e '.Messages | length > 0' <<< "$response" > /dev/null; then
-#         echo "No message received; polling again"
-#         sleep 1
-#         continue
-#     fi
-
-#     receipt_handle=$(echo "$response" | jq -r '.Messages[0].ReceiptHandle')
-#     message=$(echo "$response" | jq -r '.Messages[0].Body as $body | try ($body | fromjson) catch $body')
-    
-#     echo "Pocessing message: $message"
-
-#     echo "Deleting message with receipt handle: $receipt_handle"
-#     delete_message "$SQS_QUEUE" "$receipt_handle"
-# done
-
 while true; do
     echo "Consuming message"
     response=$(consume_message "$SQS_QUEUE")
