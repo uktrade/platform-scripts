@@ -75,7 +75,15 @@ def get_protected_buckets(
 ) -> set[str]:
     buckets: set[str] = set()
 
-    for plan_id in get_malware_protection_plan_ids(guardduty_client):
+    plans = get_malware_protection_plan_ids(guardduty_client)
+
+    if len(plans) == 0:
+        logger.info(
+            "No GuardDuty protection plans found in account, skipping all steps."
+        )
+        return []
+
+    for plan_id in plans:
         buckets.add(
             get_bucket_for_plan(
                 guardduty_client,
